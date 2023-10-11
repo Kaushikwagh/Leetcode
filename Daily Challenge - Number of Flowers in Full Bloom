@@ -1,0 +1,62 @@
+-Daily Challenge Date- 11OCT2023
+
+Q. Number of Flowers in Full Bloom
+
+-Hard
+
+-You are given a 0-indexed 2D integer array flowers, where flowers[i] = [starti, endi] means the ith flower will be in full bloom from starti to endi (inclusive). 
+ You are also given a 0-indexed integer array people of size n, where people[i] is the time that the ith person will arrive to see the flowers.
+ Return an integer array answer of size n, where answer[i] is the number of flowers that are in full bloom when the ith person arrives.
+
+- < Code >
+import java.util.Arrays;
+import java.util.TreeMap;
+
+class Solution {
+    public int[] fullBloomFlowers(int[][] flowers, int[] people) {
+        int n = flowers.length;
+        int m = people.length;
+
+        // Create an array of Flower objects to store the start and end times of each flower.
+        Flower[] flowerArr = new Flower[n];
+        for (int i = 0; i < n; i++) {
+            flowerArr[i] = new Flower(flowers[i][0], flowers[i][1]);
+        }
+
+        // Sort the Flower objects by their start times.
+        Arrays.sort(flowerArr, (a, b) -> Integer.compare(a.start, b.start));
+
+        // Create a TreeMap to store the count of flowers at each time.
+        TreeMap<Integer, Integer> bloomCount = new TreeMap<>();
+        for (int i = 0; i < n; i++) {
+            bloomCount.put(flowerArr[i].start, bloomCount.getOrDefault(flowerArr[i].start, 0) + 1);
+            bloomCount.put(flowerArr[i].end + 1, bloomCount.getOrDefault(flowerArr[i].end + 1, 0) - 1);
+        }
+
+        // Update the counts for each time in the TreeMap.
+        int prev = 0;
+        for (int time : bloomCount.keySet()) {
+            bloomCount.put(time, bloomCount.get(time) + prev);
+            prev = bloomCount.get(time);
+        }
+
+        int[] result = new int[m];
+        for (int i = 0; i < m; i++) {
+            int arrivalTime = people[i];
+            Integer count = bloomCount.floorEntry(arrivalTime).getValue();
+            result[i] = (count != null) ? count : 0;
+        }
+
+        return result;
+    }
+}
+
+class Flower {
+    int start;
+    int end;
+
+    public Flower(int start, int end) {
+        this.start = start;
+        this.end = end;
+    }
+}
